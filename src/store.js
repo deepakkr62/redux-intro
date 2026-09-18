@@ -1,12 +1,18 @@
-import { createStore } from "redux";
+import { createStore, combineReducers } from "redux";
 
-const intialState = {
+const intialStateAccount = {
   balance: 0,
   loan: 0,
   loanPurpose: "",
 };
 
-function reducer(state = intialState, action) {
+const intialStateCustomer = {
+  fullName: "",
+  nationalId: "",
+  createdAt: "",
+};
+
+function reducerAccount(state = intialStateAccount, action) {
   switch (action.type) {
     case "account/deposit":
       return {
@@ -38,22 +44,30 @@ function reducer(state = intialState, action) {
   }
 }
 
-const store = createStore(reducer);
+const reducerCustomer = (state = intialStateCustomer, action) => {
+  switch (action.type) {
+    case "customer/createCustomer":
+      return {
+        ...state,
+        fullName: action.payload.fullName,
+        nationalId: action.payload.nationalId,
+        createdAt: action.payload.createdAt,
+      };
+    case "customer/updateCustomerName":
+      return {
+        ...state,
+        fullName: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+const rootReducer = combineReducers({
+  account: reducerAccount,
+  customer: reducerCustomer,
+});
 
-// store.dispatch({ type: "account/deposit", payload: 500 });
-// console.log(store.getState());
-
-// store.dispatch({ type: "account/withdraw", payload: 200 });
-// console.log(store.getState());
-
-// store.dispatch({
-//   type: "account/requestLoan",
-//   payload: { amount: 1000, purpose: "buy a car" },
-// });
-// console.log(store.getState());
-
-// store.dispatch({ type: "account/payLoan" });
-// console.log(store.getState());
+const store = createStore(rootReducer);
 
 function Deposit(amount) {
   return {
@@ -94,6 +108,25 @@ console.log(store.getState());
 store.dispatch(PayLoan());
 console.log(store.getState());
 
-//in old base they use const ACCOOUNT_DEPOSITE=accoutn/deposite and replace the
-// string with the constant in the reducer and action creator. This is a good
-// practice to avoid typos and make it easier to manage action types.
+function createCustomer(fullName, nationalId) {
+  return {
+    type: "customer/createCustomer",
+    payload: { fullName, nationalId, createdAt: new Date().toISOString() },
+  };
+}
+
+function updateCustomerName(fullName) {
+  return {
+    type: "customer/updateCustomerName",
+    payload: fullName,
+  };
+}
+
+store.dispatch(createCustomer("Deepak Kumar", "34656789"));
+console.log(store.getState());
+
+store.dispatch(updateCustomerName("Deepak Kumar keshari"));
+console.log(store.getState());
+
+store.dispatch(Deposit(503));
+console.log(store.getState());
